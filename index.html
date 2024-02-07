@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Processing Application</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <h1>Data Processing Application</h1>
+    <button onclick="processData()">Process Data with Web Workers</button>
+    <br>
+    <hr>
+    <div id="result"></div>
+
+    <script>
+        function processData() {
+            // Generate a large array of random numbers
+            const array = Array.from({ length: 1000000 }, () => Math.floor(Math.random() * 1000000));
+
+            // Start performance measurement
+            console.time('Processing Time');
+
+            // Check if Web Workers are supported
+            if (window.Worker) {
+                // Create a new Web Worker
+                const worker = new Worker('worker.js');
+
+                // Post data to the Web Worker
+                worker.postMessage(array);
+
+                // Listen for messages from the Web Worker
+                worker.onmessage = function(event) {
+                    const sortedArray = event.data;
+
+                    // End performance measurement
+                    console.timeEnd('Processing Time');
+
+                    // Display the result
+                    document.getElementById('result').innerText = 'Data processed with Web Workers:\n' + sortedArray.slice(0, 1000000).join(', ');
+                };
+            } else {
+                // If Web Workers are not supported, fallback to processing in the main thread
+                console.time('Processing Time Without Workers');
+                const sortedArray = array.sort((a, b) => a - b);
+                console.timeEnd('Processing Time Without Workers');
+
+                document.getElementById('result').innerText = 'Data processed without Web Workers:\n' + sortedArray.slice(0, 10).join(', ');
+            }
+        }
+    </script>
+</body>
+</html>
